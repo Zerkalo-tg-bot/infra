@@ -1,0 +1,12 @@
+name: zerkalo
+
+services:
+  bot:
+    build:
+      context: ../bot
+      dockerfile: dockerfile.prod
+    container_name: telegram-bot
+    env_file:
+      - ../bot/.env.prod
+    command: node dist/index.js
+    restart: unless-stopped

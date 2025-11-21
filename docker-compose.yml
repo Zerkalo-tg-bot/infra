@@ -1,0 +1,19 @@
+name: zerkalo-dev
+
+services:
+  bot:
+    build:
+      context: ../bot
+      dockerfile: dockerfile
+    container_name: telegram-bot-dev
+    env_file:
+      - ../bot/.env
+    command: npm run dev
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ../bot/src
+          target: /app/src
+        - action: rebuild
+          path: ../bot/package.json
