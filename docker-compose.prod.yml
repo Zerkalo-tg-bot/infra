@@ -1,12 +1,24 @@
-name: zerkalo
+name: zerkalo-prod
 
 services:
   bot:
     build:
       context: ../bot
       dockerfile: dockerfile.prod
-    container_name: telegram-bot
+    container_name: zerkalo-bot-prod
     env_file:
       - ../bot/.env.prod
     command: node dist/index.js
     restart: unless-stopped
+
+  api:
+    build:
+      context: ../api
+      dockerfile: dockerfile.prod
+    container_name: zerkalo-api-prod
+    env_file:
+      - ../api/.env.prod
+    command: node dist/main.js
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:3000:3000

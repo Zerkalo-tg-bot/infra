@@ -5,7 +5,7 @@ services:
     build:
       context: ../bot
       dockerfile: dockerfile
-    container_name: telegram-bot-dev
+    container_name: zerkalo-bot-dev
     env_file:
       - ../bot/.env
     command: npm run dev
@@ -17,3 +17,33 @@ services:
           target: /app/src
         - action: rebuild
           path: ../bot/package.json
+        - action: rebuild
+          path: ../bot/package-lock.json
+        - action: rebuild
+          path: ../bot/tsconfig.json
+  api:
+    build:
+      context: ../api
+      dockerfile: dockerfile
+    container_name: zerkalo-api-dev
+    env_file:
+      - ../api/.env
+    command: npm run start:dev
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    develop:
+      watch:
+        - action: sync
+          path: ../api/src
+          target: /app/src
+        - action: rebuild
+          path: ../api/package.json
+        - action: rebuild
+          path: ../api/package-lock.json
+        - action: rebuild
+          path: ../api/nest-cli.json
+        - action: rebuild
+          path: ../api/tsconfig.json
+        - action: rebuild
+          path: ../api/tsconfig.build.json
