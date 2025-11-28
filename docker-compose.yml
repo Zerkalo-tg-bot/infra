@@ -32,6 +32,10 @@ services:
     restart: unless-stopped
     ports:
       - 3000:3000
+      - 5555:5555 # Для призма студии
+    depends_on:
+      db:
+        condition: service_healthy
     develop:
       watch:
         - action: sync
@@ -47,3 +51,20 @@ services:
           path: ../api/tsconfig.json
         - action: rebuild
           path: ../api/tsconfig.build.json
+
+  db:
+    image: postgres:16
+    container_name: zerkalo-db-dev
+    restart: unless-stopped
+    env_file:
+      - ../db/.env
+    volumes:
+      - zerkalo-db-data-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d zerkalo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  zerkalo-db-data-dev:

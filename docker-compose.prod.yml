@@ -1,15 +1,19 @@
 name: zerkalo-prod
 
 services:
-  bot:
-    build:
-      context: ../bot
-      dockerfile: dockerfile.prod
-    container_name: zerkalo-bot-prod
-    env_file:
-      - ../bot/.env.prod
-    command: node dist/index.js
+  db:
+    image: postgres:16
+    container_name: zerkalo-db-prod
     restart: unless-stopped
+    env_file:
+      - ../db/.env.prod
+    volumes:
+      - zerkalo-db-data-prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d zerkalo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build:
@@ -21,4 +25,22 @@ services:
     command: node dist/main.js
     restart: unless-stopped
     ports:
-      - 127.0.0.1:3000:3000
+      - 3000:3000
+    depends_on:
+      db:
+        condition: service_healthy
+  bot:
+    build:
+      context: ../bot
+      dockerfile: dockerfile.prod
+    container_name: zerkalo-bot-prod
+    env_file:
+      - ../bot/.env.prod
+    command: node dist/index.js
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  zerkalo-db-data-prod:
