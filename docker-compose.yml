@@ -1,26 +1,20 @@
 name: zerkalo-dev
 
 services:
-  bot:
-    build:
-      context: ../bot
-      dockerfile: dockerfile
-    container_name: zerkalo-bot-dev
-    env_file:
-      - ../bot/.env
-    command: npm run dev
+  db:
+    image: postgres:16
+    container_name: zerkalo-db-dev
     restart: unless-stopped
-    develop:
-      watch:
-        - action: sync
-          path: ../bot/src
-          target: /app/src
-        - action: rebuild
-          path: ../bot/package.json
-        - action: rebuild
-          path: ../bot/package-lock.json
-        - action: rebuild
-          path: ../bot/tsconfig.json
+    env_file:
+      - ../db/.env
+    volumes:
+      - zerkalo-db-data-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d zerkalo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
       context: ../api
@@ -52,19 +46,28 @@ services:
         - action: rebuild
           path: ../api/tsconfig.build.json
 
-  db:
-    image: postgres:16
-    container_name: zerkalo-db-dev
-    restart: unless-stopped
+  bot:
+    build:
+      context: ../bot
+      dockerfile: dockerfile
+    container_name: zerkalo-bot-dev
     env_file:
-      - ../db/.env
-    volumes:
-      - zerkalo-db-data-dev:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d zerkalo"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - ../bot/.env
+    command: npm run dev
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ../bot/src
+          target: /app/src
+        - action: rebuild
+          path: ../bot/package.json
+        - action: rebuild
+          path: ../bot/package-lock.json
+        - action: rebuild
+          path: ../bot/tsconfig.json
+    depends_on:
+      - api
 
 volumes:
   zerkalo-db-data-dev:
