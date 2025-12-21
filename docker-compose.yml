@@ -35,6 +35,9 @@ services:
         - action: sync
           path: ../api/src
           target: /app/src
+        - action: sync
+          path: ../api/prisma
+          target: /app/prisma
         - action: rebuild
           path: ../api/package.json
         - action: rebuild
@@ -60,6 +63,9 @@ services:
         - action: sync
           path: ../bot/src
           target: /app/src
+        - action: sync
+          path: ../bot/locales
+          target: /app/locales
         - action: rebuild
           path: ../bot/package.json
         - action: rebuild
